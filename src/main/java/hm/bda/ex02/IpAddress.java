@@ -45,17 +45,9 @@ public class IpAddress {
 			}
 			//Get ip location
 			try {
-				System.out.println("Host");
-				System.out.println(host);
 				InetAddress     ip          = InetAddress.getByName(host);
 				CountryResponse response    = dbReader.country(ip);
 				String          countryName = response.getCountry().getName();
-				System.out.println("IP\n");
-				System.out.println(ip);
-				System.out.println("Country\n");
-				System.out.println(countryName);
-				System.out.println("------\n");
-
 				country.set(countryName);
 				context.write(country, one);
 
