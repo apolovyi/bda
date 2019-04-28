@@ -10,7 +10,9 @@ public class Driver {
 		try
 		{
 			pgd.addClass("status-count", HttpStatus.class, "A map/reduce program that counts status in log file.");
-			pgd.addClass("country-count", IpAddress.class, "A map/reduce program that counts ip requests by countries log file.");
+			pgd.addClass("country-count", IpAddress.class, "A map/reduce program that counts ip requests by countries in log file.");
+			exitCode = pgd.run(argv);
+			pgd.addClass("known-hostname-count", KnownHostname.class, "A map/reduce program that computes how many host names could be resolved in log file.");
 			exitCode = pgd.run(argv);
 		}
 		catch (Throwable e)

@@ -19,45 +19,24 @@ import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-public class IpAddress {
+public class KnownHostname {
 	public static class StatusMapper extends Mapper<Object, Text, Text, IntWritable> {
-		private final static IntWritable one     = new IntWritable(1);
-		private              Text        country = new Text();
-		private DatabaseReader dbReader = null;
-
-
-		private void setIpDatabase() throws IOException {
-			String dbLocation = "/GeoLite2-Country.mmdb";
-			InputStream in = getClass().getResourceAsStream(dbLocation);
-			this.dbReader = new DatabaseReader.Builder(in).build();
-			System.out.println(dbLocation);
-			System.out.println(dbReader.toString());
-		}
-
+		private final static IntWritable    one         = new IntWritable(1);
+		private              Text           hostKnown   = new Text("known");
+		private              Text           hostUnknown = new Text("known");
 
 		public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
 			String dataRow = value.toString();
 			String host    = dataRow.split("\\t")[0];
-
-			if (dbReader == null) {
-				System.out.println("Setting DB Reader for IP lookup");
-				setIpDatabase();
-			}
-			//Get ip location
 			try {
-				InetAddress     ip          = InetAddress.getByName(host);
-				CountryResponse response    = dbReader.country(ip);
-				String          countryName = response.getCountry().getName();
-				country.set(countryName);
-				context.write(country, one);
+				InetAddress ip = InetAddress.getByName(host);
+				//ipText.set(ip.toString());
+				context.write(hostKnown, one);
 
 			}
 			catch (UnknownHostException e) {
+				context.write(hostUnknown, one);
 				System.out.println("Unknown host" + host);
-				e.printStackTrace();
-			}
-			catch (GeoIp2Exception e) {
-				System.out.println("Unknown IP");
 				e.printStackTrace();
 			}
 		}
@@ -83,15 +62,15 @@ public class IpAddress {
 		Configuration conf      = new Configuration();
 		String[]      otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
 		if (otherArgs.length != 2) {
-			System.err.println("Usage: country-count <in> <out>");
+			System.err.println("Usage: known-hostname-count <in> <out>");
 			System.exit(2);
 		}
-		Job job = Job.getInstance(conf, "ip address classification");
+		Job job = Job.getInstance(conf, "known hostname count");
 
-		job.setJarByClass(IpAddress.class);
-		job.setMapperClass(StatusMapper.class);
-		job.setCombinerClass(IntSumReducer.class);
-		job.setReducerClass(IntSumReducer.class);
+		job.setJarByClass(KnownHostname.class);
+		job.setMapperClass(KnownHostname.StatusMapper.class);
+		job.setCombinerClass(KnownHostname.IntSumReducer.class);
+		job.setReducerClass(KnownHostname.IntSumReducer.class);
 
 		job.setOutputKeyClass(Text.class);
 		job.setOutputValueClass(IntWritable.class);
@@ -102,4 +81,3 @@ public class IpAddress {
 		System.exit(job.waitForCompletion(true) ? 0 : 1);
 	}
 }
-
