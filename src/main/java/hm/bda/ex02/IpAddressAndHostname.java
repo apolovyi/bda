@@ -31,7 +31,6 @@ public class IpAddressAndHostname extends Configured implements Tool{
 		private Text           country  = new Text();
 		private DatabaseReader dbReader = null;
 
-
 		private void setIpDatabase() throws IOException{
 			String      dbLocation = "/GeoLite2-Country.mmdb";
 			InputStream in         = getClass().getResourceAsStream(dbLocation);
@@ -39,7 +38,6 @@ public class IpAddressAndHostname extends Configured implements Tool{
 			System.out.println(dbLocation);
 			System.out.println(dbReader.toString());
 		}
-
 
 		public void map(Object key, Text value, Context context) throws IOException, InterruptedException{
 			String dataRow = value.toString();
@@ -86,9 +84,7 @@ public class IpAddressAndHostname extends Configured implements Tool{
 
 	}
 
-	public static void main(String[] args)
-			throws Exception
-	{
+	public static void main(String[] args) throws Exception{
 		ToolRunner.run(new Configuration(), new IpAddressAndHostname(), args);
 	}
 

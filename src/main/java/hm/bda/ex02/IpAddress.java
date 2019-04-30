@@ -19,44 +19,43 @@ import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-public class IpAddress {
-	public static class StatusMapper extends Mapper<Object, Text, Text, IntWritable> {
-		private final static IntWritable one     = new IntWritable(1);
-		private              Text        country = new Text();
+public class IpAddress{
+	public static class StatusMapper extends Mapper<Object, Text, Text, IntWritable>{
+		private final static IntWritable ONE = new IntWritable(1);
+
+		private Text           country  = new Text();
 		private DatabaseReader dbReader = null;
 
-
-		private void setIpDatabase() throws IOException {
-			String dbLocation = "/GeoLite2-Country.mmdb";
-			InputStream in = getClass().getResourceAsStream(dbLocation);
+		private void setIpDatabase() throws IOException{
+			String      dbLocation = "/GeoLite2-Country.mmdb";
+			InputStream in         = getClass().getResourceAsStream(dbLocation);
 			this.dbReader = new DatabaseReader.Builder(in).build();
 			System.out.println(dbLocation);
 			System.out.println(dbReader.toString());
 		}
 
-
-		public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
+		public void map(Object key, Text value, Context context) throws IOException, InterruptedException{
 			String dataRow = value.toString();
 			String host    = dataRow.split("\\t")[0];
 
-			if (dbReader == null) {
+			if(dbReader == null){
 				System.out.println("Setting DB Reader for IP lookup");
 				setIpDatabase();
 			}
 			//Get ip location
-			try {
+			try{
 				InetAddress     ip          = InetAddress.getByName(host);
 				CountryResponse response    = dbReader.country(ip);
 				String          countryName = response.getCountry().getName();
 				country.set(countryName);
-				context.write(country, one);
+				context.write(country, ONE);
 
 			}
-			catch (UnknownHostException e) {
+			catch(UnknownHostException e){
 				System.out.println("Unknown host" + host);
 				e.printStackTrace();
 			}
-			catch (GeoIp2Exception e) {
+			catch(GeoIp2Exception e){
 				System.out.println("Unknown IP");
 				e.printStackTrace();
 			}
@@ -64,13 +63,12 @@ public class IpAddress {
 	}
 
 
-	public static class IntSumReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
+	public static class IntSumReducer extends Reducer<Text, IntWritable, Text, IntWritable>{
 		private IntWritable result = new IntWritable();
 
-		public void reduce(Text key, Iterable<IntWritable> values,
-				Reducer<Text, IntWritable, Text, IntWritable>.Context context) throws IOException, InterruptedException {
+		public void reduce(Text key, Iterable<IntWritable> values, Reducer<Text, IntWritable, Text, IntWritable>.Context context) throws IOException, InterruptedException{
 			int sum = 0;
-			for (IntWritable val : values) {
+			for(IntWritable val: values){
 				sum += val.get();
 			}
 			result.set(sum);
@@ -79,10 +77,10 @@ public class IpAddress {
 
 	}
 
-	public static void main(String[] args) throws Exception {
+	public static void main(String[] args) throws Exception{
 		Configuration conf      = new Configuration();
 		String[]      otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
-		if (otherArgs.length != 2) {
+		if(otherArgs.length != 2){
 			System.err.println("Usage: country-count <in> <out>");
 			System.exit(2);
 		}
