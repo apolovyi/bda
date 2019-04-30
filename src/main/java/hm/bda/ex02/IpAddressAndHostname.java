@@ -15,6 +15,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.util.GenericOptionsParser;
 import org.apache.hadoop.util.Tool;
+import org.apache.hadoop.util.ToolRunner;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,8 +24,8 @@ import java.net.UnknownHostException;
 
 public class IpAddressAndHostname extends Configured implements Tool{
 	public static class StatusMapper extends Mapper<Object, Text, Text, IntWritable>{
-		private final static Text        HOST_KNOWN   = new Text("known");
-		private final static Text        HOST_UNKNOWN = new Text("unknown");
+		private final static Text        HOST_KNOWN   = new Text("KNOWN HOST");
+		private final static Text        HOST_UNKNOWN = new Text("UNKNOWN HOST");
 		private final static IntWritable ONE          = new IntWritable(1);
 
 		private Text           country  = new Text();
@@ -85,6 +86,12 @@ public class IpAddressAndHostname extends Configured implements Tool{
 
 	}
 
+	public static void main(String[] args)
+			throws Exception
+	{
+		ToolRunner.run(new Configuration(), new IpAddressAndHostname(), args);
+	}
+
 	@Override
 	public int run(String[] args) throws Exception{
 		Configuration conf = new Configuration();
@@ -94,8 +101,9 @@ public class IpAddressAndHostname extends Configured implements Tool{
 			System.err.println("Usage: ip-hostname-count <in> <out>");
 			return 0;
 		}
-		Job job = Job.getInstance(conf, "ip and hostname classification");
+		setConf(conf);
 
+		Job job = Job.getInstance(conf, "ip and hostname classification");
 		job.setJarByClass(IpAddressAndHostname.class);
 		job.setMapperClass(StatusMapper.class);
 		job.setCombinerClass(IntSumReducer.class);

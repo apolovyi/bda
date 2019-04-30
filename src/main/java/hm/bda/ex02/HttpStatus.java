@@ -46,7 +46,7 @@ public class HttpStatus{
 			System.err.println("Usage: status-count <in> <out>");
 			System.exit(2);
 		}
-		Job job = Job.getInstance(conf, "status count");
+		Job job = Job.getInstance(conf, "http status count");
 
 		job.setJarByClass(HttpStatus.class);
 		job.setMapperClass(StatusMapper.class);
