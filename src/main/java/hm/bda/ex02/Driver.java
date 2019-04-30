@@ -13,6 +13,7 @@ public class Driver {
 			pgd.addClass("country-count", IpAddress.class, "A map/reduce program that counts ip requests by countries in log file.");
 			exitCode = pgd.run(argv);
 			pgd.addClass("known-hostname-count", KnownHostname.class, "A map/reduce program that computes how many host names could be resolved in log file.");
+			pgd.addClass("ip-hostname-count", IpAddressAndHostname.class, "A map/reduce program that computes the origin of IP address and how many host names could be resolved in log file.");
 			exitCode = pgd.run(argv);
 		}
 		catch (Throwable e)
